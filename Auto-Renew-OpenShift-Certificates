@@ -1,0 +1,17 @@
+#!/bin/bash
+
+CERTS=$(oc get certificates -n openshift-config -o json)
+
+for CERT in $(echo $CERTS | jq -r '.items[].metadata.name'); do
+  EXPIRY_DATE=$(echo $CERTS | jq -r ".items[] | select(.metadata.name == \"$CERT\") | .status.notAfter")
+  EXPIRY_SECONDS=$(date -d "$EXPIRY_DATE" +%s)
+  NOW_SECONDS=$(date +%s)
+  REMAINING_DAYS=$(( ($EXPIRY_SECONDS - $NOW_SECONDS) / 86400 ))
+
+  if [ "$REMAINING_DAYS" -lt 30 ]; then
+    echo "Certificate $CERT is expiring soon! Renewing..."
+    oc adm certificate approve $CERT
+  else
+    echo "Certificate $CERT is valid for another $REMAINING_DAYS days."
+  fi
+done
