@@ -1,0 +1,14 @@
+#!/bin/bash
+
+ETCD_HEALTH=$(oc exec -n openshift-etcd etcd-member -- etcdctl endpoint health | grep -c "unhealthy")
+
+if [ "$ETCD_HEALTH" -gt 0 ]; then
+  echo "Etcd quorum lost! Restoring from snapshot..."
+  
+  LATEST_SNAPSHOT=$(ls -t /var/lib/etcd/backup/*.db | head -n 1)
+  
+  oc exec -n openshift-etcd etcd-member -- etcdctl snapshot restore $LATEST_SNAPSHOT
+  echo "Etcd restored from snapshot: $LATEST_SNAPSHOT"
+else
+  echo "Etcd is healthy."
+fi
