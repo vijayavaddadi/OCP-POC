@@ -1,0 +1,13 @@
+#!/bin/bash
+
+INGRESS_HEALTH=$(oc get pods -n openshift-ingress -o jsonpath='{.items[*].status.phase}' | grep -c "Running")
+
+if [ "$INGRESS_HEALTH" -eq 0 ]; then
+  echo "Ingress controller is down! Restarting..."
+  
+  oc delete pod -n openshift-ingress --all
+  
+  echo "Ingress controller restarted."
+else
+  echo "Ingress controller is running."
+fi
