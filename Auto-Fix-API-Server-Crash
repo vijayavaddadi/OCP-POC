@@ -1,0 +1,13 @@
+#!/bin/bash
+
+APISERVER_HEALTH=$(oc get pods -n openshift-kube-apiserver -o jsonpath='{.items[*].status.phase}' | grep -c "Running")
+
+if [ "$APISERVER_HEALTH" -eq 0 ]; then
+  echo "API server is down! Restarting..."
+  
+  oc delete pod -n openshift-kube-apiserver --all
+  
+  echo "API server pods restarted."
+else
+  echo "API server is healthy."
+fi
