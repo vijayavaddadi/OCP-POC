@@ -1,0 +1,10 @@
+#!/bin/bash
+
+PVC_STATUS=$(oc get pvc -A -o jsonpath='{.items[*].status.phase}' | grep -c "Bound")
+
+if [ "$PVC_STATUS" -eq 0 ]; then
+  echo "Persistent volumes are not bound! Check storage backend."
+  oc get pvc -A
+else
+  echo "All persistent volumes are bound and healthy."
+fi
