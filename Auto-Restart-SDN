@@ -1,0 +1,13 @@
+#!/bin/bash
+
+SDN_HEALTH=$(oc get pods -n openshift-sdn -o jsonpath='{.items[*].status.phase}' | grep -c "Running")
+
+if [ "$SDN_HEALTH" -eq 0 ]; then
+  echo "SDN is down! Restarting..."
+  
+  oc delete pod -n openshift-sdn --all
+  
+  echo "SDN restarted."
+else
+  echo "SDN is healthy."
+fi
