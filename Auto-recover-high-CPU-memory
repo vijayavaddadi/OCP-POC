@@ -1,0 +1,9 @@
+#!/bin/bash
+
+HIGH_CPU_NODES=$(oc top nodes | awk '$3 > 90 {print $1}')
+HIGH_MEM_NODES=$(oc top nodes | awk '$5 > 90 {print $1}')
+
+for NODE in $HIGH_CPU_NODES $HIGH_MEM_NODES; do
+  echo "High resource usage detected on $NODE! Restarting..."
+  ssh root@$NODE "reboot"
+done
