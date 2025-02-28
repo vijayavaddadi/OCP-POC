@@ -1,0 +1,13 @@
+#!/bin/bash
+
+WORKER_NODES=$(oc get nodes -l node-role.kubernetes.io/worker -o jsonpath='{.items[*].metadata.name}')
+
+for NODE in $WORKER_NODES; do
+  STATUS=$(oc get node $NODE -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+  if [ "$STATUS" != "True" ]; then
+    echo "Worker node $NODE is NotReady. Attempting to restart..."
+    ssh root@$NODE "reboot"
+  else
+    echo "Worker node $NODE is healthy."
+  fi
+done
